@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>{{title}} - Vehicle Bridge</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' fill='none' stroke='%231d4a6e' stroke-width='2.6'%3E%3Cpath d='M5 20v-4.5l3-6.5h16l3 6.5V20H5z'/%3E%3Ccircle cx='10' cy='22.5' r='2.5'/%3E%3Ccircle cx='22' cy='22.5' r='2.5'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f3f1ec; --surface: #fbfaf7; --surface-2: #eeebe4; --ink: #15181b; --muted: #6b6f73;
+  --line: #dedad1; --accent: #1d4a6e; --accent-ink: #ffffff; --ok: #2f7a4f; --ok-bg: #e3efe6;
+  --bad: #a83a2c; --bad-bg: #f5e1dc;
+  --shadow: 0 1px 2px rgba(20,20,20,.04), 0 18px 40px -20px rgba(20,20,20,.25);
+  --road: rgba(29,74,110,.08);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1012; --surface: #16191c; --surface-2: #1d2125; --ink: #ecebe7; --muted: #959a9f;
+    --line: #272c31; --accent: #7fb2dd; --accent-ink: #0e1012; --ok: #6fc293; --ok-bg: #16281e;
+    --bad: #ec8577; --bad-bg: #2e1a17;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 18px 40px -20px rgba(0,0,0,.7);
+    --road: rgba(127,178,221,.07);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1012; --surface: #16191c; --surface-2: #1d2125; --ink: #ecebe7; --muted: #959a9f;
+  --line: #272c31; --accent: #7fb2dd; --accent-ink: #0e1012; --ok: #6fc293; --ok-bg: #16281e;
+  --bad: #ec8577; --bad-bg: #2e1a17;
+  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 18px 40px -20px rgba(0,0,0,.7);
+  --road: rgba(127,178,221,.07);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { min-height: 100vh; display: grid; place-items: center; padding: 24px 16px; background: var(--bg); color: var(--ink);
+  font: 15px/1.6 "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif; -webkit-font-smoothing: antialiased;
+  background-image: repeating-linear-gradient(115deg, transparent 0 46px, var(--road) 46px 48px); }
+.card { width: 100%; max-width: 440px; background: var(--surface); border: 1px solid var(--line); border-radius: 22px;
+  box-shadow: var(--shadow); padding: 34px 30px 30px; text-align: center; }
+.badge { width: 72px; height: 72px; border-radius: 50%; display: grid; place-items: center; margin: 0 auto 18px; }
+.badge svg { width: 34px; height: 34px; }
+.ok .badge { background: var(--ok-bg); color: var(--ok); }
+.error .badge { background: var(--bad-bg); color: var(--bad); }
+.ok .x, .error .tick { display: none; }
+h1 { font-size: 24px; letter-spacing: -.02em; margin: 0 0 8px; }
+p { color: var(--muted); margin: 0 0 24px; word-break: break-word; }
+a.btn { display: inline-block; text-decoration: none; font-weight: 700; padding: 12px 22px; border-radius: 12px;
+  background: var(--accent); color: var(--accent-ink); }
+</style>
+</head>
+<body>
+  <main class="card {{kind}}">
+    <div class="badge">
+      <svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+      <svg class="x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </div>
+    <h1>{{title}}</h1>
+    <p>{{message}}</p>
+    <a class="btn" href="{{link}}">{{link_text}}</a>
+  </main>
+<script>
+try { const t = localStorage.getItem("theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
+</body>
+</html>

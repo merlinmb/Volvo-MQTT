@@ -1,0 +1,20 @@
+services:
+  volvo-mqtt:
+    build: .
+    image: volvo-mqtt:latest
+    container_name: volvo-mqtt
+    restart: unless-stopped
+    # Host networking: reaches the broker on the LAN and serves the
+    # dashboard on http://hal.local:8084 (WEB_PORT)
+    network_mode: host
+    environment:
+      - CONFIG_DIR=/config
+      - TZ=Europe/London
+    volumes:
+      # .env lives here; tokens.json and state.json go in ./data
+      - /home/pi/portainer_data/volvo-mqtt:/config
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"

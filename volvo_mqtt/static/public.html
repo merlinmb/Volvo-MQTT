@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Vehicle Bridge</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' fill='none' stroke='%231d4a6e' stroke-width='2.6'%3E%3Cpath d='M5 20v-4.5l3-6.5h16l3 6.5V20H5z'/%3E%3Ccircle cx='10' cy='22.5' r='2.5'/%3E%3Ccircle cx='22' cy='22.5' r='2.5'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f3f1ec; --surface: #fbfaf7; --surface-2: #eeebe4; --ink: #15181b; --muted: #6b6f73;
+  --line: #dedad1; --accent: #1d4a6e; --accent-ink: #ffffff; --ok: #2f7a4f; --ok-bg: #e3efe6;
+  --bad: #a83a2c; --bad-bg: #f5e1dc;
+  --shadow: 0 1px 2px rgba(20,20,20,.04), 0 8px 24px -12px rgba(20,20,20,.12);
+  --road: rgba(29,74,110,.08);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1012; --surface: #16191c; --surface-2: #1d2125; --ink: #ecebe7; --muted: #959a9f;
+    --line: #272c31; --accent: #7fb2dd; --accent-ink: #0e1012; --ok: #6fc293; --ok-bg: #16281e;
+    --bad: #ec8577; --bad-bg: #2e1a17;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px -14px rgba(0,0,0,.6);
+    --road: rgba(127,178,221,.07);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1012; --surface: #16191c; --surface-2: #1d2125; --ink: #ecebe7; --muted: #959a9f;
+  --line: #272c31; --accent: #7fb2dd; --accent-ink: #0e1012; --ok: #6fc293; --ok-bg: #16281e;
+  --bad: #ec8577; --bad-bg: #2e1a17;
+  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px -14px rgba(0,0,0,.6);
+  --road: rgba(127,178,221,.07);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body {
+  background: var(--bg); color: var(--ink);
+  font: 16px/1.6 "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased; min-height: 100vh; display: flex; flex-direction: column;
+  background-image:
+    repeating-linear-gradient(115deg, transparent 0 46px, var(--road) 46px 48px),
+    radial-gradient(ellipse 80% 60% at 85% -10%, var(--road), transparent 70%);
+}
+.wrap { width: 100%; max-width: 1080px; margin: 0 auto; padding: 28px 24px; }
+nav { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.brand { display: flex; align-items: center; gap: 12px; text-decoration: none; color: inherit; }
+.brand svg { width: 32px; height: 32px; color: var(--accent); }
+.brand span { font-weight: 800; letter-spacing: .14em; text-transform: uppercase; font-size: 17px; }
+.btn { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font-weight: 700; font-size: 15px;
+  padding: 11px 20px; border-radius: 12px; background: var(--accent); color: var(--accent-ink); border: 0;
+  transition: transform .08s, filter .2s; }
+.btn:hover { filter: brightness(1.08); }
+.btn:active { transform: scale(.98); }
+.btn svg { width: 18px; height: 18px; }
+.btn.ghost { background: var(--surface); color: var(--ink); border: 1px solid var(--line); }
+
+main { flex: 1; display: flex; align-items: center; }
+.hero { display: grid; grid-template-columns: 1.15fr .85fr; gap: 56px; align-items: center; padding: 48px 0 32px; }
+@media (max-width: 860px) { .hero { grid-template-columns: 1fr; gap: 36px; padding-top: 28px; } }
+.eyebrow { display: inline-flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 700;
+  padding: 6px 12px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+.dot.ok { background: var(--ok); box-shadow: 0 0 0 3px var(--ok-bg); }
+.dot.bad { background: var(--bad); box-shadow: 0 0 0 3px var(--bad-bg); }
+h1 { font-size: clamp(38px, 6vw, 62px); line-height: 1.02; letter-spacing: -.035em; font-weight: 800; margin: 22px 0 18px; }
+h1 em { font-style: normal; color: var(--accent); }
+.lead { font-size: 18px; color: var(--muted); max-width: 520px; margin: 0 0 30px; }
+.cta { display: flex; gap: 12px; flex-wrap: wrap; }
+
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 22px; box-shadow: var(--shadow); padding: 26px; }
+.panel h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); margin: 0 0 18px; }
+.feature { display: grid; grid-template-columns: 42px 1fr; gap: 14px; padding: 14px 0; border-top: 1px solid var(--line); }
+.feature:first-of-type { border-top: 0; padding-top: 0; }
+.feature .ico { width: 42px; height: 42px; border-radius: 12px; background: var(--surface-2); display: grid; place-items: center; color: var(--accent); }
+.feature .ico svg { width: 20px; height: 20px; }
+.feature b { display: block; font-size: 15px; }
+.feature p { margin: 2px 0 0; color: var(--muted); font-size: 14px; line-height: 1.5; }
+.lockline { display: flex; align-items: center; gap: 10px; margin-top: 20px; padding: 12px 14px; border-radius: 12px;
+  background: var(--surface-2); font-size: 13px; color: var(--muted); }
+.lockline svg { width: 16px; height: 16px; flex: none; color: var(--accent); }
+footer { color: var(--muted); font-size: 12px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+footer .links { display: flex; gap: 18px; }
+footer a { color: var(--muted); text-decoration: none; font-weight: 600; }
+footer a:hover { color: var(--ink); text-decoration: underline; }
+.mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+@media (max-width: 560px) { .wrap { padding: 20px 16px; } .lead { font-size: 16px; } }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <nav>
+      <a class="brand" href="/">
+        <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20v-4.5l3-6.5h16l3 6.5V20a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z"/><path d="M5 15.5h22"/><circle cx="10" cy="22.5" r="2.5"/><circle cx="22" cy="22.5" r="2.5"/></svg>
+        <span>Vehicle Bridge</span>
+      </a>
+      <a class="btn ghost" href="/login">Log in</a>
+    </nav>
+  </div>
+
+  <main>
+    <div class="wrap">
+      <section class="hero">
+        <div>
+          <span class="eyebrow"><span class="dot" id="svc-dot"></span><span id="svc-text">Checking service</span></span>
+          <h1>Your car, connected to <em>your home.</em></h1>
+          <p class="lead">A private bridge between a connected vehicle and a home automation network. Vehicle status is shared over MQTT and with Apple Home, so it's always to hand.</p>
+          <div class="cta">
+            <a class="btn" href="/login">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/></svg>
+              Log in to dashboard
+            </a>
+          </div>
+        </div>
+
+        <aside class="panel">
+          <h2>What this service does</h2>
+          <div class="feature">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg></div>
+            <div><b>Live vehicle status</b><p>Battery charge, range, charging, mileage, doors and location, refreshed on a gentle schedule.</p></div>
+          </div>
+          <div class="feature">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg></div>
+            <div><b>Remote locking</b><p>Lock state and commands, available to authorised users and the home hub.</p></div>
+          </div>
+          <div class="feature">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg></div>
+            <div><b>Home automation</b><p>Publishes to the local MQTT broker and Homebridge for automations.</p></div>
+          </div>
+          <div class="lockline">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z"/></svg>
+            Private system. Authorised users only; sign-in attempts are logged.
+          </div>
+        </aside>
+      </section>
+    </div>
+  </main>
+
+  <div class="wrap">
+    <footer><span>Vehicle Bridge <span class="mono">v{{version}}</span> · Not affiliated with Volvo Cars</span><span class="links"><a href="/terms">Terms and Conditions</a><a href="/privacy">Privacy Notice</a></span></footer>
+  </div>
+
+<script>
+try { const t = localStorage.getItem("theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+fetch("healthz", { cache: "no-store" }).then(r => r.json()).then(j => {
+  document.getElementById("svc-dot").className = "dot " + (j.ok ? "ok" : "bad");
+  document.getElementById("svc-text").textContent = j.ok ? "Service online" : "Service degraded";
+}).catch(() => {
+  document.getElementById("svc-dot").className = "dot bad";
+  document.getElementById("svc-text").textContent = "Service unreachable";
+});
+</script>
+</body>
+</html>

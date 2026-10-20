@@ -1,0 +1,543 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="csrf-token" content="{{csrf}}">
+<meta name="auth" content="{{auth}}">
+<title>Volvo Bridge</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' fill='none' stroke='%231d4a6e' stroke-width='2.6'%3E%3Cpath d='M5 20v-4.5l3-6.5h16l3 6.5V20H5z'/%3E%3Ccircle cx='10' cy='22.5' r='2.5'/%3E%3Ccircle cx='22' cy='22.5' r='2.5'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root {
+  --bg: #f3f1ec; --surface: #fbfaf7; --surface-2: #eeebe4; --ink: #15181b; --muted: #6b6f73;
+  --line: #dedad1; --accent: #1d4a6e; --accent-ink: #ffffff;
+  --ok: #2f7a4f; --ok-bg: #e3efe6; --warn: #a2650f; --warn-bg: #f6ead4; --bad: #a83a2c; --bad-bg: #f5e1dc;
+  --shadow: 0 1px 2px rgba(20,20,20,.04), 0 8px 24px -12px rgba(20,20,20,.12);
+  --radius: 18px;
+  --map-filter: none;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1012; --surface: #16191c; --surface-2: #1d2125; --ink: #ecebe7; --muted: #959a9f;
+    --line: #272c31; --accent: #7fb2dd; --accent-ink: #0e1012;
+    --ok: #6fc293; --ok-bg: #16281e; --warn: #e2ae5c; --warn-bg: #2b2215; --bad: #ec8577; --bad-bg: #2e1a17;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px -14px rgba(0,0,0,.6);
+    --map-filter: invert(1) hue-rotate(180deg) brightness(.9) contrast(.9) saturate(.6);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1012; --surface: #16191c; --surface-2: #1d2125; --ink: #ecebe7; --muted: #959a9f;
+  --line: #272c31; --accent: #7fb2dd; --accent-ink: #0e1012;
+  --ok: #6fc293; --ok-bg: #16281e; --warn: #e2ae5c; --warn-bg: #2b2215; --bad: #ec8577; --bad-bg: #2e1a17;
+  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px -14px rgba(0,0,0,.6);
+  --map-filter: invert(1) hue-rotate(180deg) brightness(.9) contrast(.9) saturate(.6);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--bg); color: var(--ink);
+  font: 15px/1.5 "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+.mono, code { font-family: "IBM Plex Mono", ui-monospace, Consolas, monospace; }
+.wrap { max-width: 1180px; margin: 0 auto; padding: 28px 24px 64px; }
+
+header { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 28px; }
+.brand { display: flex; align-items: center; gap: 12px; margin-right: auto; }
+.brand svg { width: 34px; height: 34px; color: var(--accent); }
+.brand h1 { font-size: 20px; letter-spacing: .14em; text-transform: uppercase; font-weight: 800; margin: 0; }
+.brand .vin { color: var(--muted); font-size: 12px; letter-spacing: .04em; }
+.pill { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px;
+  background: var(--surface); border: 1px solid var(--line); font-size: 13px; font-weight: 600; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+.dot.ok { background: var(--ok); box-shadow: 0 0 0 3px var(--ok-bg); }
+.dot.bad { background: var(--bad); box-shadow: 0 0 0 3px var(--bad-bg); }
+.dot.warn { background: var(--warn); box-shadow: 0 0 0 3px var(--warn-bg); }
+button { font: inherit; cursor: pointer; border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+  padding: 8px 14px; border-radius: 12px; font-weight: 600; transition: transform .08s, background .2s; }
+button:hover:not(:disabled) { background: var(--surface-2); }
+button:active:not(:disabled) { transform: scale(.98); }
+button:disabled { opacity: .45; cursor: not-allowed; }
+button.primary { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
+button.primary:hover:not(:disabled) { background: var(--accent); filter: brightness(1.08); }
+.icon-btn { padding: 8px 10px; display: inline-flex; align-items: center; gap: 6px; }
+.icon-btn svg { width: 16px; height: 16px; }
+.logout { margin: 0; }
+
+.grid { display: grid; gap: 18px; grid-template-columns: repeat(12, 1fr); }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow);
+  padding: 22px; min-width: 0; }
+.span-12 { grid-column: span 12; } .span-8 { grid-column: span 8; } .span-7 { grid-column: span 7; }
+.span-6 { grid-column: span 6; } .span-5 { grid-column: span 5; } .span-4 { grid-column: span 4; }
+@media (max-width: 900px) { .span-8, .span-7, .span-6, .span-5, .span-4 { grid-column: span 12; } }
+.label { font-size: 12px; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); font-weight: 700; margin: 0 0 12px; }
+.sub { color: var(--muted); font-size: 13px; }
+
+/* Lock hero */
+.lock { display: flex; gap: 24px; align-items: center; flex-wrap: wrap; }
+.lock-ring { width: 120px; height: 120px; border-radius: 50%; display: grid; place-items: center; flex: none;
+  background: var(--surface-2); border: 1px solid var(--line); transition: background .3s; }
+.lock-ring svg { width: 52px; height: 52px; }
+.lock-ring.locked { background: var(--ok-bg); color: var(--ok); border-color: transparent; }
+.lock-ring.unlocked { background: var(--warn-bg); color: var(--warn); border-color: transparent; }
+.lock-ring.busy { animation: pulse 1.2s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: .55; } }
+.lock-state { font-size: 38px; font-weight: 800; letter-spacing: -.02em; line-height: 1.05; }
+.lock-actions { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+.doors { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; margin-top: 20px; }
+.door { display: flex; justify-content: space-between; gap: 8px; padding: 8px 12px; border-radius: 10px; background: var(--surface-2); font-size: 13px; }
+.door b { font-weight: 700; }
+.door b.open { color: var(--bad); }
+
+/* stats */
+.stat-value { font-size: 44px; font-weight: 800; letter-spacing: -.03em; line-height: 1; }
+.stat-value small { font-size: 16px; font-weight: 600; color: var(--muted); margin-left: 6px; letter-spacing: 0; }
+.bar { height: 8px; background: var(--surface-2); border-radius: 99px; overflow: hidden; margin: 16px 0 8px; }
+.bar > i { display: block; height: 100%; background: var(--accent); border-radius: 99px; width: 0; transition: width .6s ease; }
+.bar.warn > i { background: var(--warn); } .bar.bad > i { background: var(--bad); }
+
+#map { height: 300px; border-radius: 14px; overflow: hidden; border: 1px solid var(--line); background: var(--surface-2); }
+#map .leaflet-tile-pane { filter: var(--map-filter); }
+.map-meta { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 12px; font-size: 13px; align-items: center; }
+.map-meta a { color: var(--accent); font-weight: 600; text-decoration: none; margin-left: auto; }
+
+/* health */
+.kv { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+.kv div { padding: 14px; background: var(--surface-2); border-radius: 12px; }
+.kv dt { font-size: 12px; color: var(--muted); font-weight: 600; margin-bottom: 4px; }
+.kv dd { margin: 0; font-size: 17px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.error-box { margin-top: 14px; padding: 12px 14px; border-radius: 12px; background: var(--bad-bg); color: var(--bad); font-size: 13px; word-break: break-word; }
+.events { list-style: none; padding: 0; margin: 0; max-height: 330px; overflow: auto; }
+.events li { display: grid; grid-template-columns: 70px 1fr; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+.events li:last-child { border-bottom: 0; }
+.events time { color: var(--muted); }
+.events .error { color: var(--bad); } .events .warn { color: var(--warn); }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+td { padding: 8px 6px; border-bottom: 1px solid var(--line); vertical-align: top; word-break: break-all; }
+td:first-child { color: var(--muted); width: 40%; word-break: normal; }
+details summary { cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; }
+details summary::-webkit-details-marker { display: none; }
+details summary::after { content: "+"; font-size: 20px; color: var(--muted); }
+details[open] summary::after { content: "−"; }
+details[open] summary { margin-bottom: 12px; }
+.topics code { display: block; padding: 6px 0; font-size: 12.5px; border-bottom: 1px dashed var(--line); }
+.topics code span { color: var(--muted); float: right; font-family: "Manrope", sans-serif; }
+.toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(20px); opacity: 0;
+  background: var(--ink); color: var(--bg); padding: 10px 18px; border-radius: 12px; font-weight: 600; font-size: 14px;
+  transition: all .25s; pointer-events: none; max-width: calc(100% - 32px); }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.connect { display: flex; align-items: center; justify-content: space-between; gap: 18px; flex-wrap: wrap;
+  margin-bottom: 18px; padding: 20px 22px; border-radius: var(--radius); background: var(--surface);
+  border: 1px solid var(--accent); box-shadow: var(--shadow); }
+.connect[hidden], .btn-link[hidden] { display: none; }
+.battery-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+.chip { display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 700; padding: 5px 11px;
+  border-radius: 999px; background: var(--surface-2); color: var(--muted); }
+.chip.charging { background: var(--ok-bg); color: var(--ok); }
+.chip.charging .dot { background: var(--ok); animation: pulse 1.2s ease-in-out infinite; }
+.chip.plugged { background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--accent); }
+.chip.plugged .dot { background: var(--accent); }
+.chip.fault { background: var(--bad-bg); color: var(--bad); }
+.chip.fault .dot { background: var(--bad); }
+.battery-bar { position: relative; height: 14px; overflow: visible; }
+.battery-bar > i { border-radius: 99px; }
+.battery-bar.ok > i { background: var(--ok); }
+.battery-bar.charging > i { background-image: repeating-linear-gradient(115deg, rgba(255,255,255,.28) 0 8px, transparent 8px 16px);
+  background-color: var(--ok); background-size: 32px 100%; animation: flow 1s linear infinite; }
+@keyframes flow { to { background-position: 32px 0; } }
+.battery-bar > b { position: absolute; top: -4px; bottom: -4px; width: 2px; border-radius: 2px; background: var(--ink); opacity: .55; }
+.range { font-size: 20px; font-weight: 800; letter-spacing: -.01em; margin-top: 4px; }
+.range small { font-size: 13px; color: var(--muted); font-weight: 600; margin-left: 4px; }
+.connect b { font-size: 17px; }
+.connect .sub { margin: 4px 0 0; max-width: 620px; }
+.btn-link { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font-weight: 700;
+  padding: 10px 16px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
+.btn-link.primary { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
+.btn-link svg { width: 16px; height: 16px; }
+.kv dd a { font-size: 13px; color: var(--accent); font-weight: 700; margin-left: auto; text-decoration: none; }
+footer { margin-top: 28px; color: var(--muted); font-size: 12px; text-align: center; }
+@media (max-width: 560px) {
+  .wrap { padding: 20px 16px 48px; }
+  .stat-value { font-size: 36px; } .lock-state { font-size: 30px; }
+  .lock-ring { width: 92px; height: 92px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20v-4.5l3-6.5h16l3 6.5V20a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z"/><path d="M5 15.5h22"/><circle cx="10" cy="22.5" r="2.5"/><circle cx="22" cy="22.5" r="2.5"/></svg>
+      <div><h1>Volvo Bridge</h1><div class="vin mono" id="vin">-</div></div>
+    </div>
+    <span class="pill"><span class="dot" id="mqtt-dot"></span><span id="mqtt-label">MQTT</span></span>
+    <span class="pill"><span class="dot" id="api-dot"></span><span id="api-label">API</span></span>
+    <button class="icon-btn" id="refresh-btn" title="Fetch fresh data from Volvo (throttled)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></svg>Refresh
+    </button>
+    <button class="icon-btn" id="theme-btn" title="Toggle theme" aria-label="Toggle theme">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+    </button>
+    <form method="post" action="/logout" id="logout-form" class="logout">
+      <input type="hidden" name="csrf" value="{{csrf}}">
+      <button class="icon-btn" type="submit" title="Signed in as {{user}}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>Sign out
+      </button>
+    </form>
+  </header>
+
+  <section class="connect" id="connect" hidden>
+    <div>
+      <b>Connect your Volvo ID</b>
+      <p class="sub" id="connect-text">Sign in with Volvo to let this bridge read the car's status. You'll be sent to Volvo's own sign-in page and brought back here.</p>
+    </div>
+    <a class="btn-link primary" id="connect-btn" href="/oauth/start">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>
+      Connect Volvo ID
+    </a>
+  </section>
+
+  <div class="grid">
+    <section class="card span-7">
+      <p class="label">Central lock</p>
+      <div class="lock">
+        <div class="lock-ring" id="lock-ring">
+          <svg id="lock-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path id="shackle" d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg>
+        </div>
+        <div>
+          <div class="lock-state" id="lock-state">Unknown</div>
+          <div class="sub" id="lock-time">Waiting for first poll</div>
+          <div class="lock-actions">
+            <button class="primary" id="lock-btn">Lock</button>
+            <button id="unlock-btn">Unlock</button>
+          </div>
+          <div class="sub" id="controls-note" style="margin-top:8px"></div>
+        </div>
+      </div>
+      <div class="doors" id="doors"></div>
+    </section>
+
+    <section class="card span-5">
+      <div id="battery-block">
+        <div class="battery-head">
+          <p class="label" style="margin:0">Battery</p>
+          <span class="chip" id="charge-chip"><span class="dot"></span><span id="charge-text">-</span></span>
+        </div>
+        <div class="stat-value" id="battery">-<small>%</small></div>
+        <div class="bar battery-bar" id="battery-bar"><i></i><b id="target-mark" hidden></b></div>
+        <div class="range" id="range"></div>
+        <div class="sub" id="charge-detail"></div>
+        <div class="sub" id="battery-time"></div>
+      </div>
+      <div id="fuel-block" hidden>
+        <p class="label" style="margin-top:26px">Fuel</p>
+        <div class="stat-value" id="fuel">-<small id="fuel-unit"></small></div>
+        <div class="bar" id="fuel-bar" hidden><i></i></div>
+        <div class="sub" id="fuel-time"></div>
+      </div>
+      <p class="label" style="margin-top:26px">Odometer</p>
+      <div class="stat-value" id="odo">-<small id="odo-unit"></small></div>
+      <div class="sub" id="odo-time"></div>
+    </section>
+
+    <section class="card span-12">
+      <p class="label">Location</p>
+      <div id="map"></div>
+      <div class="map-meta">
+        <span class="mono" id="coords">No location yet</span>
+        <span id="heading"></span>
+        <span class="sub" id="loc-time"></span>
+        <a id="maps-link" href="#" target="_blank" rel="noopener" hidden>Open in Google Maps →</a>
+      </div>
+    </section>
+
+    <section class="card span-8">
+      <p class="label">Container health</p>
+      <dl class="kv">
+        <div><dt>Volvo ID</dt><dd id="volvo-id">-</dd></div>
+        <div><dt>Uptime</dt><dd id="uptime">-</dd></div>
+        <div><dt>Access token expires</dt><dd id="token">-</dd></div>
+        <div><dt>Refresh loop</dt><dd id="refresh-loop">-</dd></div>
+        <div><dt>Last poll</dt><dd id="last-poll">-</dd></div>
+        <div><dt>Next poll</dt><dd id="next-poll" class="mono">-</dd></div>
+        <div><dt>Requests (total)</dt><dd id="req-total">-</dd></div>
+      </dl>
+      <p class="label" style="margin-top:22px">API budget today</p>
+      <div class="bar" id="budget-bar"><i></i></div>
+      <div class="sub" id="budget-text">-</div>
+      <div class="sub" id="http-codes" style="margin-top:6px"></div>
+      <div class="error-box" id="last-error" hidden></div>
+    </section>
+
+    <section class="card span-4">
+      <p class="label">Activity</p>
+      <ul class="events" id="events"><li><time></time><span class="sub">No events yet</span></li></ul>
+    </section>
+
+    <section class="card span-6">
+      <details>
+        <summary><p class="label" style="margin:0">Configuration</p></summary>
+        <table id="config"></table>
+      </details>
+    </section>
+
+    <section class="card span-6">
+      <details>
+        <summary><p class="label" style="margin:0">MQTT topics</p></summary>
+        <div class="topics" id="topics"></div>
+      </details>
+    </section>
+  </div>
+  <footer>volvo-mqtt <span id="version"></span> · <span id="host"></span> · <span id="platform"></span></footer>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+const CSRF = document.querySelector('meta[name="csrf-token"]').content;
+if (document.querySelector('meta[name="auth"]').content === "off") $("logout-form").hidden = true;
+let S = null, map = null, marker = null, busyUntil = 0;
+
+// ---------- theme ----------
+try { const t = localStorage.getItem("theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+$("theme-btn").onclick = () => {
+  const cur = document.documentElement.dataset.theme ||
+    (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  const next = cur === "dark" ? "light" : "dark";
+  document.documentElement.dataset.theme = next;
+  try { localStorage.setItem("theme", next); } catch (e) {}
+};
+
+// ---------- formatting ----------
+const fmtNum = (v, d = 0) => (v === null || v === undefined || v === "" || isNaN(+v)) ? "-" :
+  (+v).toLocaleString("en-GB", { maximumFractionDigits: d });
+function ago(ts) {
+  if (!ts) return "never";
+  const t = typeof ts === "number" ? ts * 1000 : Date.parse(ts);
+  if (isNaN(t)) return ts;
+  const s = Math.round((Date.now() - t) / 1000);
+  if (s < 0) return "just now";
+  if (s < 60) return `${s}s ago`;
+  if (s < 3600) return `${Math.floor(s / 60)} min ago`;
+  if (s < 86400) return `${Math.floor(s / 3600)} h ${Math.floor((s % 3600) / 60)} min ago`;
+  return new Date(t).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" });
+}
+function dur(sec) {
+  if (sec === null || sec === undefined) return "-";
+  sec = Math.max(0, Math.round(sec));
+  const d = Math.floor(sec / 86400), h = Math.floor(sec % 86400 / 3600), m = Math.floor(sec % 3600 / 60), s = sec % 60;
+  if (d) return `${d}d ${h}h`;
+  if (h) return `${h}h ${m}m`;
+  if (m) return `${m}m ${String(s).padStart(2, "0")}s`;
+  return `${s}s`;
+}
+const pretty = (k) => k.replace(/([A-Z])/g, " $1").replace(/^./, c => c.toUpperCase());
+function toast(msg) { const t = $("toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("show"), 3200); }
+function setDot(el, state) { el.className = "dot " + (state || ""); }
+
+// ---------- render ----------
+function render() {
+  if (!S) return;
+  const v = S.vehicle || {};
+  $("vin").textContent = S.vin || "VIN not yet discovered";
+  setDot($("mqtt-dot"), S.mqtt_connected ? "ok" : "bad");
+  $("mqtt-label").textContent = S.mqtt_connected ? "MQTT connected" : "MQTT offline";
+  const apiState = S.last_poll_ok === null ? "" : S.last_poll_ok ? "ok" : "warn";
+  setDot($("api-dot"), apiState);
+  $("api-label").textContent = S.last_poll_ok === null ? "API pending" : S.last_poll_ok ? "API healthy" : "API errors";
+
+  // lock
+  const lock = (v.lock_status || "").toUpperCase();
+  const ring = $("lock-ring");
+  ring.className = "lock-ring" + (lock === "LOCKED" ? " locked" : lock === "UNLOCKED" ? " unlocked" : "") +
+    (Date.now() < busyUntil ? " busy" : "");
+  $("shackle").setAttribute("d", lock === "UNLOCKED" ? "M8 10.5V7a4 4 0 0 1 7.6-1.7" : "M8 10.5V7a4 4 0 0 1 8 0v3.5");
+  $("lock-state").textContent = lock === "LOCKED" ? "Locked" : lock === "UNLOCKED" ? "Unlocked" : "Unknown";
+  $("lock-time").textContent = v.lock_timestamp ? `Reported ${ago(v.lock_timestamp)}` : "Waiting for first poll";
+  const c = S.controls_enabled;
+  $("lock-btn").disabled = !c || lock === "LOCKED";
+  $("unlock-btn").disabled = !c || lock === "UNLOCKED";
+  let note = c ? "" : "Web controls are off. Set WEB_ENABLE_CONTROLS=true to enable.";
+  if (S.last_command) {
+    const lc = S.last_command;
+    note += (note ? " " : "") + `Last command: ${lc.action} via ${lc.source || "?"} - ${lc.ok ? "ok" : "failed"} (${lc.message || ""}), ${ago(lc.t)}`;
+  }
+  $("controls-note").textContent = note;
+  const doors = v.doors || {};
+  $("doors").innerHTML = Object.keys(doors).length ? Object.entries(doors).map(([k, val]) =>
+    `<div class="door"><span>${pretty(k)}</span><b class="${val === "OPEN" ? "open" : ""}">${(val || "-").toLowerCase()}</b></div>`).join("") : "";
+
+  // battery (EV / PHEV)
+  const hasBattery = v.battery_level !== undefined && v.battery_level !== null;
+  const isEv = S.config.powertrain !== "ice";
+  $("battery-block").hidden = !isEv;
+  if (isEv) {
+    const lvl = hasBattery ? Math.max(0, Math.min(100, +v.battery_level)) : null;
+    $("battery").firstChild.nodeValue = hasBattery ? fmtNum(lvl) : "-";
+    const bar = $("battery-bar");
+    bar.className = "bar battery-bar " + (v.charging ? "charging" : lvl === null ? "" : lvl < 15 ? "bad" : lvl < 30 ? "warn" : "ok");
+    bar.firstElementChild.style.width = (lvl || 0) + "%";
+    const tgt = v.target_battery_level;
+    $("target-mark").hidden = !(tgt > 0 && tgt <= 100);
+    if (tgt) { $("target-mark").style.left = `calc(${tgt}% - 1px)`; $("target-mark").title = `Charge target ${tgt}%`; }
+    $("range").innerHTML = v.electric_range !== undefined && v.electric_range !== null
+      ? `${fmtNum(v.electric_range)}<small>${v.range_unit || "km"} range</small>` : "";
+    const st = v.charging_status, conn = v.charger_connection;
+    let chip = "", text = "Unplugged";
+    if (st === "CHARGING") { chip = "charging"; text = "Charging"; }
+    else if (st === "ERROR" || conn === "FAULT") { chip = "fault"; text = "Charging fault"; }
+    else if (st === "DONE") { chip = "plugged"; text = conn === "CONNECTED" ? "Charged, plugged in" : "Charged"; }
+    else if (st === "SCHEDULED") { chip = "plugged"; text = "Charge scheduled"; }
+    else if (conn === "CONNECTED") { chip = "plugged"; text = "Plugged in"; }
+    else if (st === undefined && conn === undefined) { text = "-"; }
+    $("charge-chip").className = "chip " + chip; $("charge-text").textContent = text;
+    const bits = [];
+    if (v.charging) {
+      if (v.charging_type && v.charging_type !== "NONE") bits.push(v.charging_type);
+      if (v.charging_power) bits.push(`${fmtNum(v.charging_power, 1)} ${v.charging_power_unit === "watt" ? "W" : "kW"}`);
+      if (v.time_to_target_min) bits.push(`${dur(v.time_to_target_min * 60)} to ${tgt ? tgt + "%" : "target"}`);
+    } else if (tgt) bits.push(`Charge target ${tgt}%`);
+    if (v.charging_current_limit) bits.push(`${fmtNum(v.charging_current_limit)} A limit`);
+    $("charge-detail").textContent = bits.join(" · ");
+    $("battery-time").textContent = v.energy_timestamp ? `Reported ${ago(v.energy_timestamp)}` : (hasBattery ? "" : "Waiting for first poll");
+  }
+
+  // fuel (PHEV / ICE) & odometer
+  $("fuel-block").hidden = !(v.fuel_level !== undefined && v.fuel_level !== null) && isEv;
+  if (!isEv) $("fuel-block").firstElementChild.style.marginTop = "0";
+  $("fuel").firstChild.nodeValue = fmtNum(v.fuel_level, 1);
+  $("fuel-unit").textContent = v.fuel_unit ? (v.fuel_unit === "l" ? "litres" : v.fuel_unit) : "";
+  $("fuel-time").textContent = v.fuel_timestamp ? `Reported ${ago(v.fuel_timestamp)}` : "";
+  const tank = +(S.config && S.config.fuel_tank_litres);
+  if (tank && v.fuel_level !== undefined) {
+    const pct = Math.min(100, Math.max(0, (+v.fuel_level / tank) * 100));
+    $("fuel-bar").hidden = false; $("fuel-bar").className = "bar" + (pct < 15 ? " bad" : pct < 30 ? " warn" : "");
+    $("fuel-bar").firstElementChild.style.width = pct + "%";
+    $("fuel-time").textContent = `${Math.round(pct)}% of ${tank} l · ` + $("fuel-time").textContent;
+  }
+  $("odo").firstChild.nodeValue = fmtNum(v.odometer);
+  $("odo-unit").textContent = v.odometer_unit || "";
+  $("odo-time").textContent = v.odometer_timestamp ? `Reported ${ago(v.odometer_timestamp)}` : "";
+
+  // location
+  if (v.latitude !== undefined && v.latitude !== null && window.L) {
+    const ll = [+v.latitude, +v.longitude];
+    if (!map) {
+      map = L.map("map", { zoomControl: true, attributionControl: true }).setView(ll, 15);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        { maxZoom: 19, attribution: "© OpenStreetMap" }).addTo(map);
+      marker = L.circleMarker(ll, { radius: 10, color: getComputedStyle(document.documentElement).getPropertyValue("--accent"),
+        weight: 3, fillOpacity: .35 }).addTo(map);
+    } else { marker.setLatLng(ll); }
+    $("coords").textContent = `${(+v.latitude).toFixed(5)}, ${(+v.longitude).toFixed(5)}`;
+    $("heading").textContent = v.heading !== undefined && v.heading !== null ? `Heading ${fmtNum(v.heading)}°` : "";
+    $("loc-time").textContent = v.location_timestamp ? ago(v.location_timestamp) : "";
+    $("maps-link").hidden = false;
+    $("maps-link").href = `https://www.google.com/maps?q=${v.latitude},${v.longitude}`;
+  } else if (!S.config.enable_location) {
+    $("coords").textContent = "Location polling disabled (ENABLE_LOCATION=false)";
+  }
+
+  // Volvo ID connection
+  const vo = S.volvo || {};
+  $("connect").hidden = !!vo.connected;
+  if (!vo.oauth_configured) {
+    $("connect-text").textContent = "Set VOLVO_CLIENT_ID and VOLVO_CLIENT_SECRET in .env, then restart the container to connect.";
+    $("connect-btn").hidden = true;
+  }
+  $("volvo-id").innerHTML = `<span class="dot ${vo.connected ? "ok" : "bad"}"></span>${vo.connected ? "Connected" : "Not connected"}` +
+    (vo.oauth_configured ? `<a href="/oauth/start">${vo.connected ? "Reconnect" : "Connect"}</a>` : "");
+
+  // health
+  $("uptime").textContent = dur(S.uptime);
+  const exp = S.token.expires_at ? S.token.expires_at - Date.now() / 1000 : null;
+  $("token").innerHTML = `<span class="dot ${exp > 300 ? "ok" : exp > 0 ? "warn" : "bad"}"></span>${exp > 0 ? dur(exp) : "expired"}`;
+  $("refresh-loop").innerHTML = `<span class="dot ${S.token.refresh_loop_alive ? "ok" : "bad"}"></span>${S.token.refresh_loop_alive ? "Running" : S.token.can_refresh ? "Stopped" : "No refresh token"}`;
+  $("last-poll").innerHTML = `<span class="dot ${S.last_poll_ok ? "ok" : S.last_poll_ok === false ? "warn" : ""}"></span>${ago(S.last_poll)}`;
+  $("next-poll").textContent = S.next_poll ? dur(S.next_poll - Date.now() / 1000) : "-";
+  $("req-total").textContent = fmtNum(S.requests_total);
+  const r = S.rate, pct = r.per_day ? (r.used_today / r.per_day) * 100 : 0;
+  $("budget-bar").className = "bar" + (pct > 90 ? " bad" : pct > 70 ? " warn" : "");
+  $("budget-bar").firstElementChild.style.width = Math.min(100, pct) + "%";
+  $("budget-text").textContent = `${fmtNum(r.used_today)} of ${fmtNum(r.per_day)} requests used · limit ${r.per_minute}/min · polling every ${dur(S.config.poll_interval)}`;
+  const codes = Object.entries(S.http_codes || {}).map(([k, n]) => `HTTP ${k}: ${n}`).join(" · ");
+  $("http-codes").textContent = codes;
+  const le = $("last-error");
+  const errs = [];
+  if (S.token.last_error) errs.push(`Token refresh failing: ${S.token.last_error}. Re-run the login (see README) or update VOLVO_REFRESH_TOKEN.`);
+  if (S.last_error) errs.push(`Last API error ${ago(S.last_error_at)}: ${S.last_error}`);
+  if (errs.length) { le.hidden = false; le.textContent = errs.join("\n"); le.style.whiteSpace = "pre-line"; } else le.hidden = true;
+
+  // events
+  if (S.events && S.events.length) {
+    $("events").innerHTML = S.events.map(e => {
+      const t = new Date(e.t * 1000).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+      const span = document.createElement("span"); span.className = e.level; span.textContent = e.msg;
+      return `<li><time class="mono">${t}</time>${span.outerHTML}</li>`;
+    }).join("");
+  }
+
+  // config
+  $("config").innerHTML = Object.entries(S.config).map(([k, val]) => {
+    const td = document.createElement("td"); td.className = "mono"; td.textContent = val === null ? "-" : String(val);
+    return `<tr><td>${k}</td>${td.outerHTML}</tr>`;
+  }).join("");
+
+  const p = S.topic_prefix;
+  const topics = [
+    ["state", "combined JSON"], ["energy · odometer · doors · location", "raw API JSON"],
+    ["sensor/<name>", "scalar values"], ["lock/state", "LOCKED / UNLOCKED"],
+    ["lock/current · lock/target", "S / U (Homebridge)"], ["lock/set", "publish LOCK / UNLOCK"],
+    ["refresh", "publish to force poll"], ["command/result", "last command JSON"],
+    ["availability", "online / offline"], ["bridge/status", "health JSON"],
+  ];
+  $("topics").innerHTML = topics.map(([t, d]) => `<code>${p}/${t}<span>${d}</span></code>`).join("");
+
+  $("version").textContent = "v" + S.version;
+  $("host").textContent = S.container.hostname;
+  $("platform").textContent = `Python ${S.container.python}`;
+}
+
+async function load() {
+  try {
+    const r = await fetch("api/status", { cache: "no-store", credentials: "same-origin" });
+    if (r.status === 401) { location.href = "/login"; return; }
+    S = await r.json();
+    render();
+  } catch (e) {
+    setDot($("mqtt-dot"), "bad"); $("mqtt-label").textContent = "Bridge unreachable";
+  }
+}
+
+async function post(action) {
+  const headers = { "X-CSRF-Token": CSRF };
+  if (S && S.controls_need_pin && action !== "refresh") {
+    const pin = prompt("Control PIN");
+    if (!pin) return;
+    headers["X-Control-Pin"] = pin;
+  }
+  const r = await fetch("api/" + action, { method: "POST", headers, credentials: "same-origin" });
+  if (r.status === 401) { location.href = "/login"; return; }
+  const j = await r.json().catch(() => ({}));
+  if (r.ok) {
+    toast(action === "refresh" ? "Refresh requested" : `${action[0].toUpperCase() + action.slice(1)} command sent`);
+    if (action !== "refresh") busyUntil = Date.now() + 25000;
+    setTimeout(load, 3000); setTimeout(load, 12000); setTimeout(load, 30000);
+  } else toast(j.error || `Failed (${r.status})`);
+  render();
+}
+$("refresh-btn").onclick = () => post("refresh");
+$("lock-btn").onclick = () => post("lock");
+$("unlock-btn").onclick = () => { if (confirm("Unlock the car?")) post("unlock"); };
+
+load();
+setInterval(load, 10000);
+setInterval(render, 1000);
+</script>
+</body>
+</html>

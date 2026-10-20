@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Sign in - Vehicle Bridge</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' fill='none' stroke='%231d4a6e' stroke-width='2.6'%3E%3Cpath d='M5 20v-4.5l3-6.5h16l3 6.5V20H5z'/%3E%3Ccircle cx='10' cy='22.5' r='2.5'/%3E%3Ccircle cx='22' cy='22.5' r='2.5'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f3f1ec; --surface: #fbfaf7; --surface-2: #eeebe4; --ink: #15181b; --muted: #6b6f73;
+  --line: #dedad1; --accent: #1d4a6e; --accent-ink: #ffffff; --bad: #a83a2c; --bad-bg: #f5e1dc;
+  --info-bg: #e3ebf2; --shadow: 0 1px 2px rgba(20,20,20,.04), 0 18px 40px -20px rgba(20,20,20,.25);
+  --road: rgba(29,74,110,.08);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1012; --surface: #16191c; --surface-2: #1d2125; --ink: #ecebe7; --muted: #959a9f;
+    --line: #272c31; --accent: #7fb2dd; --accent-ink: #0e1012; --bad: #ec8577; --bad-bg: #2e1a17;
+    --info-bg: #17222c; --shadow: 0 1px 2px rgba(0,0,0,.3), 0 18px 40px -20px rgba(0,0,0,.7);
+    --road: rgba(127,178,221,.07);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1012; --surface: #16191c; --surface-2: #1d2125; --ink: #ecebe7; --muted: #959a9f;
+  --line: #272c31; --accent: #7fb2dd; --accent-ink: #0e1012; --bad: #ec8577; --bad-bg: #2e1a17;
+  --info-bg: #17222c; --shadow: 0 1px 2px rgba(0,0,0,.3), 0 18px 40px -20px rgba(0,0,0,.7);
+  --road: rgba(127,178,221,.07);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  min-height: 100vh; display: grid; place-items: center; padding: 24px 16px;
+  background: var(--bg); color: var(--ink);
+  font: 15px/1.5 "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif; -webkit-font-smoothing: antialiased;
+  background-image: repeating-linear-gradient(115deg, transparent 0 46px, var(--road) 46px 48px);
+}
+.card { width: 100%; max-width: 400px; background: var(--surface); border: 1px solid var(--line);
+  border-radius: 22px; box-shadow: var(--shadow); padding: 34px 30px 28px; }
+.brand { display: flex; align-items: center; gap: 12px; margin-bottom: 26px; text-decoration: none; color: inherit; }
+.brand svg { width: 30px; height: 30px; color: var(--accent); }
+.brand span { font-weight: 800; letter-spacing: .14em; text-transform: uppercase; font-size: 15px; }
+h1 { font-size: 26px; letter-spacing: -.02em; margin: 0 0 4px; }
+.sub { color: var(--muted); margin: 0 0 22px; font-size: 14px; }
+label { display: block; font-size: 13px; font-weight: 700; margin: 0 0 6px; }
+input { width: 100%; font: inherit; color: var(--ink); background: var(--surface-2); border: 1px solid var(--line);
+  border-radius: 12px; padding: 12px 14px; margin-bottom: 16px; outline: none; transition: border-color .2s, box-shadow .2s; }
+input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent); }
+button { width: 100%; font: inherit; font-weight: 700; font-size: 15px; cursor: pointer; border: 0; border-radius: 12px;
+  padding: 13px; background: var(--accent); color: var(--accent-ink); margin-top: 4px; transition: filter .2s, transform .08s; }
+button:hover { filter: brightness(1.08); } button:active { transform: scale(.99); }
+button:disabled { opacity: .6; cursor: wait; }
+.msg { border-radius: 12px; padding: 10px 14px; font-size: 13.5px; margin-bottom: 18px; }
+.msg.error { background: var(--bad-bg); color: var(--bad); }
+.msg.info { background: var(--info-bg); color: var(--accent); }
+.msg:empty { display: none; }
+.foot { display: flex; justify-content: space-between; margin-top: 22px; font-size: 13px; color: var(--muted); }
+.foot a { color: var(--muted); text-decoration: none; } .foot a:hover { color: var(--ink); }
+</style>
+</head>
+<body>
+  <main class="card">
+    <a class="brand" href="/">
+      <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20v-4.5l3-6.5h16l3 6.5V20a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z"/><path d="M5 15.5h22"/><circle cx="10" cy="22.5" r="2.5"/><circle cx="22" cy="22.5" r="2.5"/></svg>
+      <span>Vehicle Bridge</span>
+    </a>
+    <h1>Sign in</h1>
+    <p class="sub">Authorised users only.</p>
+    <div class="msg {{message_class}}" role="alert">{{message}}</div>
+    <form method="post" action="/login" id="f">
+      <label for="u">Username</label>
+      <input id="u" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" required autofocus>
+      <label for="p">Password</label>
+      <input id="p" name="password" type="password" autocomplete="current-password" required>
+      <button type="submit" id="go">Sign in</button>
+    </form>
+    <div class="foot"><a href="/">← Back</a><span><a href="/terms">Terms</a> · <a href="/privacy">Privacy</a></span></div>
+  </main>
+<script>
+try { const t = localStorage.getItem("theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+document.getElementById("f").addEventListener("submit", () => {
+  const b = document.getElementById("go"); b.disabled = true; b.textContent = "Signing in…";
+});
+</script>
+</body>
+</html>

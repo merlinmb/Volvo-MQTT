@@ -1,0 +1,7 @@
+.env
+data/
+tests/
+__pycache__/
+*.pyc
+.git
+deploy.*

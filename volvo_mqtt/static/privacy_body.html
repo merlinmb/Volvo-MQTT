@@ -1,0 +1,35 @@
+<p class="note">This notice explains how Vehicle Bridge, operated by {{owner}}, handles personal data. The service is run privately for personal, non-commercial use and processes as little data as it needs.</p>
+
+<h2>1. What data is processed</h2>
+<ul>
+  <li><b>Vehicle data</b> from the Volvo Cars APIs: vehicle identification number (VIN), battery charge level, electric range and charging status (or fuel level on non-electric cars), odometer reading, door, window and lock status, and the vehicle's location and heading.</li>
+  <li><b>Authorisation tokens</b> issued by Volvo ID when you approve access. Your Volvo ID password is never received or stored.</li>
+  <li><b>Dashboard sign-in records</b>: username, IP address and time of sign-in attempts, kept for security.</li>
+</ul>
+
+<h2>2. Why it is used</h2>
+<p>Data is used only to show the vehicle's status to authorised users, to run home automations, and to send the lock and unlock commands a user requests. The lawful basis is the consent you give when connecting your Volvo ID, and the operator's legitimate interest in keeping the service secure.</p>
+
+<h2>3. Where it is stored and who sees it</h2>
+<ul>
+  <li>Data is stored on a private server in the United Kingdom, under the operator's control.</li>
+  <li>The latest vehicle values are shared on the operator's private home network (MQTT broker and Homebridge). They are not sold, rented or shared with anyone for marketing.</li>
+  <li>The data comes from Volvo Cars, who process it under their own privacy policy.</li>
+  <li>When a signed-in user views the map, the browser loads map tiles from OpenStreetMap, and fonts from Google Fonts. Those providers receive the viewer's IP address under their own policies.</li>
+</ul>
+
+<h2>4. How long it is kept</h2>
+<ul>
+  <li>Vehicle data: only the latest reading is kept and each new reading overwrites the last one. No location history is stored.</li>
+  <li>Authorisation tokens: until access is revoked or the service is withdrawn, after which they are deleted.</li>
+  <li>Sign-in and service logs: these rotate automatically and are normally kept for a few weeks at most.</li>
+</ul>
+
+<h2>5. Security</h2>
+<p>Access to the dashboard requires a password and is protected by session controls, sign-in attempt limits and security headers. Secrets and tokens are kept out of the website, and access to Volvo's APIs is rate limited.</p>
+
+<h2>6. Your rights</h2>
+<p>Under UK data protection law you can ask for access to your data, ask for it to be corrected or deleted, object to its use, or withdraw consent at any time. Withdrawing consent stops further collection and the stored tokens are deleted. If you have concerns, you can also complain to the Information Commissioner's Office (ico.org.uk).</p>
+
+<h2>7. Contact</h2>
+<p>For any privacy question or request: {{contact}}.</p>

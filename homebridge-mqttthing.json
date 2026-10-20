@@ -1,0 +1,51 @@
+{
+  "_comment": "Add these to the 'accessories' array of your Homebridge config (requires homebridge-mqttthing).",
+  "accessories": [
+    {
+      "accessory": "mqttthing",
+      "type": "lockMechanism",
+      "name": "Volvo",
+      "url": "mqtt://192.168.1.55:1883",
+      "username": "",
+      "password": "",
+      "topics": {
+        "getLockCurrentState": "volvo/vehicle/lock/current",
+        "getLockTargetState": "volvo/vehicle/lock/target",
+        "setLockTargetState": "volvo/vehicle/lock/set",
+        "getOnline": "volvo/vehicle/availability",
+        "getBatteryLevel": "volvo/vehicle/sensor/battery_level",
+        "getChargingState": "volvo/vehicle/sensor/homekit_charging_state"
+      },
+      "lockValues": [
+        "U",
+        "S",
+        "J",
+        "?"
+      ],
+      "onlineValue": "online",
+      "offlineValue": "offline",
+      "logMqtt": false,
+      "chargingStateValues": [
+        "NOT_CHARGING",
+        "CHARGING",
+        "NOT_CHARGEABLE"
+      ]
+    },
+    {
+      "accessory": "mqttthing",
+      "type": "contactSensor",
+      "name": "Volvo Doors",
+      "url": "mqtt://192.168.1.55:1883",
+      "username": "",
+      "password": "",
+      "topics": {
+        "getContactSensorState": "volvo/vehicle/sensor/any_open",
+        "getOnline": "volvo/vehicle/availability"
+      },
+      "onValue": "true",
+      "offValue": "false",
+      "onlineValue": "online",
+      "offlineValue": "offline"
+    }
+  ]
+}
