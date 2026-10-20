@@ -31,7 +31,7 @@ limiting and a built-in web dashboard.
 1. Sign in at developer.volvocars.com and create an API application.
 2. Copy the **VCC API key**.
 3. Publish the application to get a **client ID / client secret**, request the
-   scopes below, register the redirect URI `http://volvo.mgbeets.com/callback`,
+   scopes below, register the redirect URI `http://volvo.your_url.com/callback`,
    and use `/terms` and `/privacy` on the same host as the Terms and Privacy URLs.
 
 Scopes for a fully electric car (`POWERTRAIN=bev`, the default):
@@ -62,7 +62,7 @@ The callback URL is built in. Register **exactly** this redirect URI on your
 Volvo application and put the same value in `.env`:
 
 ```dotenv
-VOLVO_REDIRECT_URI=http://volvo.mgbeets.com/callback
+VOLVO_REDIRECT_URI=http://volvo.your_url.com/callback
 ```
 
 Then sign in to the dashboard and click **Connect Volvo ID**. You're sent to
@@ -183,7 +183,7 @@ use the real client IP and cookies are marked `Secure`:
 ```nginx
 server {
     listen 443 ssl;
-    server_name volvo.mgbeets.com;
+    server_name volvo.your_url.com;
     # ssl_certificate ... / ssl_certificate_key ...
     location / {
         proxy_pass http://192.168.1.55:8084;
