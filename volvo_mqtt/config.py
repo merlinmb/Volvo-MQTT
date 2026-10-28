@@ -108,6 +108,7 @@ class Config:
     legal_updated: str = "20 October 2026"
 
     log_level: str = "INFO"
+    google_maps_api_key: str = ""
     extra: dict = field(default_factory=dict)
 
     @property
@@ -198,6 +199,6 @@ def load_config() -> Config:
         site_contact_email=_get("SITE_CONTACT_EMAIL"),
         legal_updated=_get("LEGAL_UPDATED", "20 October 2026") or "20 October 2026",
         log_level=(_get("LOG_LEVEL", "INFO") or "INFO").upper(),
+        google_maps_api_key=_get("GOOGLE_MAPS_API_KEY", ""),
     )
-    cfg.extra["google_maps_api_key"] = _get("GOOGLE_MAPS_API_KEY", "")
     return cfg

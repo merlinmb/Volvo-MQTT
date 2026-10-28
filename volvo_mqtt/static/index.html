@@ -307,7 +307,7 @@ footer { margin-top: 28px; color: var(--muted); font-size: 12px; text-align: cen
 </div>
 <div class="toast" id="toast"></div>
 
-<script src="https://maps.googleapis.com/maps/api/js?key={{google_maps_api_key}}"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key={{google_maps_api_key}}" async defer></script>
 <script>
 const $ = (id) => document.getElementById(id);
 const CSRF = document.querySelector('meta[name="csrf-token"]').content;
@@ -440,8 +440,9 @@ function render() {
     const ll = { lat: +v.latitude, lng: +v.longitude };
     if (!map) {
       map = new google.maps.Map($("map"), { zoom: 15, center: ll, mapTypeControl: false });
-      marker = new google.maps.Marker({ position: ll, map: map, icon: { path: google.maps.SymbolPath.CIRCLE, scale: 8, fillColor: getComputedStyle(document.documentElement).getPropertyValue("--accent"), fillOpacity: .35, strokeColor: getComputedStyle(document.documentElement).getPropertyValue("--accent"), strokeWeight: 2 } });
-    } else { marker.setPosition(ll); }
+      const accentColor = getComputedStyle(document.documentElement).getPropertyValue("--accent").trim();
+      marker = new google.maps.marker.AdvancedMarkerElement({ position: ll, map: map, title: "Vehicle location", content: (() => { const div = document.createElement("div"); div.style.width = "16px"; div.style.height = "16px"; div.style.borderRadius = "50%"; div.style.backgroundColor = accentColor; div.style.border = `2px solid ${accentColor}`; div.style.opacity = "0.35"; return div; })() });
+    } else { marker.position = ll; }
     $("coords").textContent = `${(+v.latitude).toFixed(5)}, ${(+v.longitude).toFixed(5)}`;
     $("heading").textContent = v.heading !== undefined && v.heading !== null ? `Heading ${fmtNum(v.heading)}°` : "";
     $("loc-time").textContent = v.location_timestamp ? ago(v.location_timestamp) : "";

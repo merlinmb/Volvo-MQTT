@@ -247,7 +247,7 @@ def make_handler(bridge: "Bridge"):
                         "csrf": html.escape(sess["csrf"]),
                         "user": html.escape(sess["user"]),
                         "auth": "on" if auth_on else "off",
-                        "google_maps_api_key": html.escape(cfg.extra.get("google_maps_api_key", "")),
+                        "google_maps_api_key": html.escape(cfg.google_maps_api_key),
                     })
                 return self._page("public.html", {"version": __version__})
             if path == "/oauth/start":
