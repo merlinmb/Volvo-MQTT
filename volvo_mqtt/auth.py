@@ -56,6 +56,7 @@ class TokenManager:
                 self.access_token = data.get("access_token")
                 self.refresh_token = data.get("refresh_token")
                 self.expires_at = float(data.get("expires_at", 0))
+                self.granted_scope = data.get("granted_scope")
                 log.info("Loaded tokens from %s", f)
             except (ValueError, OSError) as exc:
                 log.error("Could not read %s: %s", f, exc)
@@ -87,6 +88,7 @@ class TokenManager:
             "access_token": self.access_token,
             "refresh_token": self.refresh_token,
             "expires_at": self.expires_at,
+            "granted_scope": self.granted_scope,
             "updated": int(time.time()),
         }, indent=2))
         os.chmod(tmp, 0o600)
@@ -107,7 +109,11 @@ class TokenManager:
             self.access_token = payload["access_token"]
             # Volvo rotates refresh tokens; keep the old one only if none is returned.
             self.refresh_token = payload.get("refresh_token", self.refresh_token)
-            self.expires_at = time.time() + int(payload.get("expires_in", 1799))
+            expires_in = int(payload.get("expires_in", 1799))
+            self.expires_at = time.time() + expires_in
+            if "scope" in payload:
+                self.granted_scope = payload["scope"]
+            log.info("Token stored: expires in %.0f min", expires_in / 60)
             self._save()
 
     def refresh(self) -> None:
@@ -158,13 +164,14 @@ class TokenManager:
     def _refresh_loop(self) -> None:
         failures = 0
         margin = self.cfg.token_refresh_margin
+        min_wait = 60  # Don't refresh more than once per minute, even if token is expiring soon
         while not self._stop.is_set():
             if not self.refresh_token:
                 # Waiting for the first authorisation (dashboard Connect / .env)
                 if self._stop.wait(15):
                     return
                 continue
-            wait = self.seconds_left() - margin
+            wait = max(self.seconds_left() - margin, min_wait)
             if wait > 0:
                 log.debug("Next token refresh in %.0fs", wait)
                 if self._stop.wait(min(wait, 3600)):
