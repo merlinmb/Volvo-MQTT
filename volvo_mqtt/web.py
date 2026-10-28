@@ -6,7 +6,7 @@ Public:   GET /            holding page (or the dashboard when signed in)
 Signed in: GET /oauth/start  begins "Connect Volvo ID"
           GET /login       login form;  POST /login
           GET /healthz     {"ok": bool} for the Docker health check
-Signed in: GET /api/status, /api/raw;  POST /api/refresh|lock|unlock, POST /logout
+Signed in: GET /api/status, /api/raw, /api/logs;  POST /api/refresh|lock|unlock, POST /logout
 """
 from __future__ import annotations
 
@@ -273,6 +273,15 @@ def make_handler(bridge: "Bridge"):
                     return self._json(200, build_status(bridge))
                 if path == "/api/raw":
                     return self._json(200, bridge.status.raw)
+                if path == "/api/logs":
+                    log_cap = logging.getLogger("volvo_mqtt").handlers
+                    from .bridge import LogCapture
+                    logs = []
+                    for handler in log_cap:
+                        if isinstance(handler, LogCapture):
+                            logs = handler.get_logs()
+                            break
+                    return self._json(200, {"logs": logs})
             self._json(404, {"error": "not found"})
 
         # ---------- Volvo ID OAuth (authorisation code + PKCE) ----------

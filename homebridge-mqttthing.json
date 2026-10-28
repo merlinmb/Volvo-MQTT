@@ -30,7 +30,7 @@
         "CHARGING",
         "NOT_CHARGEABLE"
       ]
-    },
+    },p
     {
       "accessory": "mqttthing",
       "type": "contactSensor",

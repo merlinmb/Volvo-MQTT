@@ -6,6 +6,7 @@ import logging
 import queue
 import signal
 import time
+from collections import deque
 
 import paho.mqtt.client as mqtt
 
@@ -17,6 +18,22 @@ from .ratelimit import RateLimiter, RateLimitExceeded
 from .status import Status
 
 log = logging.getLogger("volvo_mqtt")
+
+
+class LogCapture(logging.Handler):
+	def __init__(self, max_lines=500):
+		super().__init__()
+		self.lines = deque(maxlen=max_lines)
+
+	def emit(self, record):
+		try:
+			msg = self.format(record)
+			self.lines.append(msg)
+		except Exception:
+			self.handleError(record)
+
+	def get_logs(self):
+		return list(self.lines)
 
 LOCK_WORDS = {"LOCK", "LOCKED", "S", "SECURED", "1", "ON", "TRUE"}
 UNLOCK_WORDS = {"UNLOCK", "UNLOCKED", "U", "UNSECURED", "0", "OFF", "FALSE"}
@@ -297,6 +314,8 @@ def main() -> None:
     cfg = load_config()
     logging.basicConfig(level=cfg.log_level, format="%(asctime)s %(levelname)-7s %(name)s: %(message)s")
     logging.getLogger("urllib3").setLevel(logging.WARNING)
+    log_cap = LogCapture()
+    logging.getLogger("volvo_mqtt").addHandler(log_cap)
     try:
         bridge = Bridge(cfg)
     except AuthError as exc:
