@@ -199,3 +199,5 @@ def load_config() -> Config:
         legal_updated=_get("LEGAL_UPDATED", "20 October 2026") or "20 October 2026",
         log_level=(_get("LOG_LEVEL", "INFO") or "INFO").upper(),
     )
+    cfg.extra["google_maps_api_key"] = _get("GOOGLE_MAPS_API_KEY", "")
+    return cfg

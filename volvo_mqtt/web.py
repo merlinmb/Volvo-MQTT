@@ -98,11 +98,11 @@ def _static(name: str) -> str:
 
 
 CSP = ("default-src 'self'; "
-       "script-src 'self' 'nonce-{nonce}' https://cdnjs.cloudflare.com; "
-       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; "
+       "script-src 'self' 'nonce-{nonce}' https://cdn.jsdelivr.net https://maps.googleapis.com; "
+       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
        "font-src https://fonts.gstatic.com; "
-       "img-src 'self' data: https://*.tile.openstreetmap.org https://cdnjs.cloudflare.com; "
-       "connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'")
+       "img-src 'self' data: https://maps.gstatic.com https://maps.googleapis.com; "
+       "connect-src 'self' https://maps.googleapis.com https://maps.gstatic.com; frame-ancestors 'none'; base-uri 'none'; form-action 'self'")
 
 
 def make_handler(bridge: "Bridge"):
@@ -247,6 +247,7 @@ def make_handler(bridge: "Bridge"):
                         "csrf": html.escape(sess["csrf"]),
                         "user": html.escape(sess["user"]),
                         "auth": "on" if auth_on else "off",
+                        "google_maps_api_key": html.escape(cfg.extra.get("google_maps_api_key", "")),
                     })
                 return self._page("public.html", {"version": __version__})
             if path == "/oauth/start":

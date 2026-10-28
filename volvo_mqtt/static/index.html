@@ -10,7 +10,6 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' fill='none' stroke='%231d4a6e' stroke-width='2.6'%3E%3Cpath d='M5 20v-4.5l3-6.5h16l3 6.5V20H5z'/%3E%3Ccircle cx='10' cy='22.5' r='2.5'/%3E%3Ccircle cx='22' cy='22.5' r='2.5'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <style>
 :root {
   --bg: #f3f1ec; --surface: #fbfaf7; --surface-2: #eeebe4; --ink: #15181b; --muted: #6b6f73;
@@ -101,7 +100,6 @@ button.primary:hover:not(:disabled) { background: var(--accent); filter: brightn
 .bar.warn > i { background: var(--warn); } .bar.bad > i { background: var(--bad); }
 
 #map { height: 300px; border-radius: 14px; overflow: hidden; border: 1px solid var(--line); background: var(--surface-2); }
-#map .leaflet-tile-pane { filter: var(--map-filter); }
 .map-meta { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 12px; font-size: 13px; align-items: center; }
 .map-meta a { color: var(--accent); font-weight: 600; text-decoration: none; margin-left: auto; }
 
@@ -309,7 +307,7 @@ footer { margin-top: 28px; color: var(--muted); font-size: 12px; text-align: cen
 </div>
 <div class="toast" id="toast"></div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key={{google_maps_api_key}}"></script>
 <script>
 const $ = (id) => document.getElementById(id);
 const CSRF = document.querySelector('meta[name="csrf-token"]').content;
@@ -438,15 +436,12 @@ function render() {
   $("odo-time").textContent = v.odometer_timestamp ? `Reported ${ago(v.odometer_timestamp)}` : "";
 
   // location
-  if (v.latitude !== undefined && v.latitude !== null && window.L) {
-    const ll = [+v.latitude, +v.longitude];
+  if (v.latitude !== undefined && v.latitude !== null && window.google) {
+    const ll = { lat: +v.latitude, lng: +v.longitude };
     if (!map) {
-      map = L.map("map", { zoomControl: true, attributionControl: true }).setView(ll, 15);
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-        { maxZoom: 19, attribution: "© OpenStreetMap" }).addTo(map);
-      marker = L.circleMarker(ll, { radius: 10, color: getComputedStyle(document.documentElement).getPropertyValue("--accent"),
-        weight: 3, fillOpacity: .35 }).addTo(map);
-    } else { marker.setLatLng(ll); }
+      map = new google.maps.Map($("map"), { zoom: 15, center: ll, mapTypeControl: false });
+      marker = new google.maps.Marker({ position: ll, map: map, icon: { path: google.maps.SymbolPath.CIRCLE, scale: 8, fillColor: getComputedStyle(document.documentElement).getPropertyValue("--accent"), fillOpacity: .35, strokeColor: getComputedStyle(document.documentElement).getPropertyValue("--accent"), strokeWeight: 2 } });
+    } else { marker.setPosition(ll); }
     $("coords").textContent = `${(+v.latitude).toFixed(5)}, ${(+v.longitude).toFixed(5)}`;
     $("heading").textContent = v.heading !== undefined && v.heading !== null ? `Heading ${fmtNum(v.heading)}°` : "";
     $("loc-time").textContent = v.location_timestamp ? ago(v.location_timestamp) : "";
