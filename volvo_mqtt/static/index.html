@@ -46,7 +46,7 @@ body {
 .mono, code { font-family: "IBM Plex Mono", ui-monospace, Consolas, monospace; }
 .wrap { max-width: 1180px; margin: 0 auto; padding: 28px 24px 64px; }
 
-header { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 28px; }
+header { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 28px; }
 .brand { display: flex; align-items: center; gap: 12px; margin-right: auto; }
 .brand svg { width: 34px; height: 34px; color: var(--accent); }
 .brand h1 { font-size: 20px; letter-spacing: .14em; text-transform: uppercase; font-weight: 800; margin: 0; }
@@ -170,6 +170,8 @@ footer { margin-top: 28px; color: var(--muted); font-size: 12px; text-align: cen
   .wrap { padding: 20px 16px 48px; }
   .stat-value { font-size: 36px; } .lock-state { font-size: 30px; }
   .lock-ring { width: 92px; height: 92px; }
+  header { gap: 8px; }
+  button.primary { padding: 6px 10px; font-size: 13px; }
 }
 </style>
 </head>
@@ -464,8 +466,7 @@ function render() {
   } else {
     $("connect-quick-btn").hidden = vo.connected;
   }
-  $("volvo-id").innerHTML = `<span class="dot ${vo.connected ? "ok" : "bad"}"></span>${vo.connected ? "Connected" : "Not connected"}` +
-    (vo.oauth_configured ? `<a href="/oauth/start">${vo.connected ? "Reconnect" : "Connect"}</a>` : "");
+  $("volvo-id").innerHTML = `<span class="dot ${vo.connected ? "ok" : "bad"}"></span>${vo.connected ? "Connected" : "Not connected"}`;
   $("volvo-scopes").textContent = vo.scope ? vo.scope.split(" ").join(" · ") : "-";
 
   // health
