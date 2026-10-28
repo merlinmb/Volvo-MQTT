@@ -116,16 +116,22 @@ button.primary:hover:not(:disabled) { background: var(--accent); filter: brightn
 .events li:last-child { border-bottom: 0; }
 .events time { color: var(--muted); }
 .events .error { color: var(--bad); } .events .warn { color: var(--warn); }
+.logs { max-height: 400px; overflow-y: auto; background: var(--surface-2); border-radius: 8px; padding: 12px; font-family: "IBM Plex Mono", monospace; font-size: 12px; line-height: 1.4; }
+.logs div { word-break: break-word; padding: 2px 0; }
+.logs-pause-btn { padding: 4px 8px; font-size: 11px; }
+.logs .error { color: var(--bad); } .logs .warn { color: var(--warn); } .logs .info { color: var(--muted); }
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
-td { padding: 8px 6px; border-bottom: 1px solid var(--line); vertical-align: top; word-break: break-all; }
-td:first-child { color: var(--muted); width: 40%; word-break: normal; }
+td { padding: 10px 6px; border-bottom: 1px solid var(--line); vertical-align: top; word-break: break-all; }
+td:first-child { color: var(--muted); width: 40%; word-break: normal; font-weight: 600; }
 details summary { cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; }
 details summary::-webkit-details-marker { display: none; }
 details summary::after { content: "+"; font-size: 20px; color: var(--muted); }
 details[open] summary::after { content: "−"; }
 details[open] summary { margin-bottom: 12px; }
-.topics code { display: block; padding: 6px 0; font-size: 12.5px; border-bottom: 1px dashed var(--line); }
-.topics code span { color: var(--muted); float: right; font-family: "Manrope", sans-serif; }
+.topics { display: flex; flex-direction: column; gap: 0; }
+.topics code { display: block; padding: 10px 0; font-size: 12.5px; border-bottom: 1px dashed var(--line); }
+.topics code:last-child { border-bottom: none; }
+.topics code span { color: var(--muted); float: right; font-family: "Manrope", sans-serif; word-break: normal; }
 .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(20px); opacity: 0;
   background: var(--ink); color: var(--bg); padding: 10px 18px; border-radius: 12px; font-weight: 600; font-size: 14px;
   transition: all .25s; pointer-events: none; max-width: calc(100% - 32px); }
@@ -176,6 +182,9 @@ footer { margin-top: 28px; color: var(--muted); font-size: 12px; text-align: cen
     </div>
     <span class="pill"><span class="dot" id="mqtt-dot"></span><span id="mqtt-label">MQTT</span></span>
     <span class="pill"><span class="dot" id="api-dot"></span><span id="api-label">API</span></span>
+    <button class="primary icon-btn" id="connect-quick-btn" title="Connect or reconnect your Volvo ID" hidden>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>Connect
+    </button>
     <button class="icon-btn" id="refresh-btn" title="Fetch fresh data from Volvo (throttled)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></svg>Refresh
     </button>
@@ -255,10 +264,11 @@ footer { margin-top: 28px; color: var(--muted); font-size: 12px; text-align: cen
       </div>
     </section>
 
-    <section class="card span-8">
+    <section class="card span-12">
       <p class="label">Container health</p>
       <dl class="kv">
         <div><dt>Volvo ID</dt><dd id="volvo-id">-</dd></div>
+        <div><dt>Granted scopes</dt><dd id="volvo-scopes" class="mono" style="font-size:11px">-</dd></div>
         <div><dt>Uptime</dt><dd id="uptime">-</dd></div>
         <div><dt>Access token expires</dt><dd id="token">-</dd></div>
         <div><dt>Refresh loop</dt><dd id="refresh-loop">-</dd></div>
@@ -273,23 +283,24 @@ footer { margin-top: 28px; color: var(--muted); font-size: 12px; text-align: cen
       <div class="error-box" id="last-error" hidden></div>
     </section>
 
-    <section class="card span-4">
+    <section class="card span-6">
       <p class="label">Activity</p>
       <ul class="events" id="events"><li><time></time><span class="sub">No events yet</span></li></ul>
     </section>
 
     <section class="card span-6">
-      <details>
-        <summary><p class="label" style="margin:0">Configuration</p></summary>
-        <table id="config"></table>
-      </details>
+      <p class="label">Logs <button id="logs-pause" class="logs-pause-btn" style="float:right; margin-top:-2px;">Pause</button></p>
+      <div class="logs" id="logs"><div class="sub">Loading...</div></div>
     </section>
 
     <section class="card span-6">
-      <details>
-        <summary><p class="label" style="margin:0">MQTT topics</p></summary>
-        <div class="topics" id="topics"></div>
-      </details>
+      <p class="label">Configuration</p>
+      <table id="config"></table>
+    </section>
+
+    <section class="card span-6">
+      <p class="label">MQTT topics</p>
+      <div class="topics" id="topics"></div>
     </section>
   </div>
   <footer>volvo-mqtt <span id="version"></span> · <span id="host"></span> · <span id="platform"></span></footer>
@@ -301,7 +312,7 @@ footer { margin-top: 28px; color: var(--muted); font-size: 12px; text-align: cen
 const $ = (id) => document.getElementById(id);
 const CSRF = document.querySelector('meta[name="csrf-token"]').content;
 if (document.querySelector('meta[name="auth"]').content === "off") $("logout-form").hidden = true;
-let S = null, map = null, marker = null, busyUntil = 0;
+let S = null, map = null, marker = null, busyUntil = 0, logsPaused = false;
 
 // ---------- theme ----------
 try { const t = localStorage.getItem("theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
@@ -449,9 +460,13 @@ function render() {
   if (!vo.oauth_configured) {
     $("connect-text").textContent = "Set VOLVO_CLIENT_ID and VOLVO_CLIENT_SECRET in .env, then restart the container to connect.";
     $("connect-btn").hidden = true;
+    $("connect-quick-btn").hidden = true;
+  } else {
+    $("connect-quick-btn").hidden = vo.connected;
   }
   $("volvo-id").innerHTML = `<span class="dot ${vo.connected ? "ok" : "bad"}"></span>${vo.connected ? "Connected" : "Not connected"}` +
     (vo.oauth_configured ? `<a href="/oauth/start">${vo.connected ? "Reconnect" : "Connect"}</a>` : "");
+  $("volvo-scopes").textContent = vo.scope ? vo.scope.split(" ").join(" · ") : "-";
 
   // health
   $("uptime").textContent = dur(S.uptime);
@@ -503,6 +518,31 @@ function render() {
   $("platform").textContent = `Python ${S.container.python}`;
 }
 
+async function loadLogs() {
+  if (logsPaused) return;
+  try {
+    const r = await fetch("api/logs", { cache: "no-store", credentials: "same-origin" });
+    if (r.status === 401) return;
+    const data = await r.json();
+    const logsEl = $("logs");
+    const wasAtBottom = logsEl.scrollTop + logsEl.clientHeight >= logsEl.scrollHeight - 5;
+    logsEl.innerHTML = (data.logs || []).map(line => {
+      let cls = "";
+      if (line.includes(" ERROR ")) cls = "error";
+      else if (line.includes(" WARNING ")) cls = "warn";
+      else if (line.includes(" INFO ")) cls = "info";
+      return `<div class="${cls}">${html.escape(line)}</div>`;
+    }).join("") || '<div class="sub">No logs yet</div>';
+    if (wasAtBottom) logsEl.scrollTop = logsEl.scrollHeight;
+  } catch (e) {}
+}
+
+const html = { escape: (s) => {
+  const div = document.createElement("div");
+  div.textContent = s;
+  return div.innerHTML;
+} };
+
 async function load() {
   try {
     const r = await fetch("api/status", { cache: "no-store", credentials: "same-origin" });
@@ -534,9 +574,17 @@ async function post(action) {
 $("refresh-btn").onclick = () => post("refresh");
 $("lock-btn").onclick = () => post("lock");
 $("unlock-btn").onclick = () => { if (confirm("Unlock the car?")) post("unlock"); };
+$("logs-pause").onclick = () => {
+  logsPaused = !logsPaused;
+  $("logs-pause").textContent = logsPaused ? "Resume" : "Pause";
+  if (!logsPaused) loadLogs();
+};
+$("connect-quick-btn").onclick = () => location.href = "/oauth/start";
 
 load();
+loadLogs();
 setInterval(load, 10000);
+setInterval(loadLogs, 5000);
 setInterval(render, 1000);
 </script>
 </body>
