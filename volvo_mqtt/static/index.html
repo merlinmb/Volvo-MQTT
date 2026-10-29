@@ -10,6 +10,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' fill='none' stroke='%231d4a6e' stroke-width='2.6'%3E%3Cpath d='M5 20v-4.5l3-6.5h16l3 6.5V20H5z'/%3E%3Ccircle cx='10' cy='22.5' r='2.5'/%3E%3Ccircle cx='22' cy='22.5' r='2.5'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
 <style>
 :root {
   --bg: #f3f1ec; --surface: #fbfaf7; --surface-2: #eeebe4; --ink: #15181b; --muted: #6b6f73;
@@ -211,8 +212,8 @@ footer { margin-top: 28px; color: var(--muted); font-size: 12px; text-align: cen
   </section>
 
   <div class="grid">
-    <section class="card span-7">
-      <p class="label">Central lock</p>
+    <details open class="card span-7">
+      <summary class="label">Central lock</summary>
       <div class="lock">
         <div class="lock-ring" id="lock-ring">
           <svg id="lock-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path id="shackle" d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg>
@@ -228,14 +229,11 @@ footer { margin-top: 28px; color: var(--muted); font-size: 12px; text-align: cen
         </div>
       </div>
       <div class="doors" id="doors"></div>
-    </section>
+    </details>
 
-    <section class="card span-5">
+    <details open class="card span-5">
+      <summary class="battery-head"><span class="label" style="margin:0">Vehicle metrics</span><span class="chip" id="charge-chip"><span class="dot"></span><span id="charge-text">-</span></span></summary>
       <div id="battery-block">
-        <div class="battery-head">
-          <p class="label" style="margin:0">Battery</p>
-          <span class="chip" id="charge-chip"><span class="dot"></span><span id="charge-text">-</span></span>
-        </div>
         <div class="stat-value" id="battery">-<small>%</small></div>
         <div class="bar battery-bar" id="battery-bar"><i></i><b id="target-mark" hidden></b></div>
         <div class="range" id="range"></div>
@@ -251,21 +249,21 @@ footer { margin-top: 28px; color: var(--muted); font-size: 12px; text-align: cen
       <p class="label" style="margin-top:26px">Odometer</p>
       <div class="stat-value" id="odo">-<small id="odo-unit"></small></div>
       <div class="sub" id="odo-time"></div>
-    </section>
+    </details>
 
-    <section class="card span-12">
-      <p class="label">Location</p>
+    <details open class="card span-12" id="location-card">
+      <summary class="label">Location</summary>
       <div id="map"></div>
       <div class="map-meta">
         <span class="mono" id="coords">No location yet</span>
         <span id="heading"></span>
         <span class="sub" id="loc-time"></span>
-        <a id="maps-link" href="#" target="_blank" rel="noopener" hidden>Open in Google Maps →</a>
+        <a id="maps-link" href="#" target="_blank" rel="noopener" hidden>Open in OpenStreetMap →</a>
       </div>
-    </section>
+    </details>
 
-    <section class="card span-12">
-      <p class="label">Container health</p>
+    <details open class="card span-12">
+      <summary class="label">Container health</summary>
       <dl class="kv">
         <div><dt>Volvo ID</dt><dd id="volvo-id">-</dd></div>
         <div><dt>Granted scopes</dt><dd id="volvo-scopes" class="mono" style="font-size:11px">-</dd></div>
@@ -281,33 +279,34 @@ footer { margin-top: 28px; color: var(--muted); font-size: 12px; text-align: cen
       <div class="sub" id="budget-text">-</div>
       <div class="sub" id="http-codes" style="margin-top:6px"></div>
       <div class="error-box" id="last-error" hidden></div>
-    </section>
+    </details>
 
-    <section class="card span-6">
-      <p class="label">Activity</p>
+    <details open class="card span-6">
+      <summary class="label">Activity</summary>
       <ul class="events" id="events"><li><time></time><span class="sub">No events yet</span></li></ul>
-    </section>
+    </details>
 
-    <section class="card span-6">
-      <p class="label">Logs <button id="logs-pause" class="logs-pause-btn" style="float:right; margin-top:-2px;">Pause</button></p>
+    <details open class="card span-6">
+      <summary class="label">Logs</summary>
+      <button id="logs-pause" class="logs-pause-btn" style="float:right; margin-top:-2px;">Pause</button>
       <div class="logs" id="logs"><div class="sub">Loading...</div></div>
-    </section>
+    </details>
 
-    <section class="card span-6">
-      <p class="label">Configuration</p>
+    <details open class="card span-6">
+      <summary class="label">Configuration</summary>
       <table id="config"></table>
-    </section>
+    </details>
 
-    <section class="card span-6">
-      <p class="label">MQTT topics</p>
+    <details open class="card span-6">
+      <summary class="label">MQTT topics</summary>
       <div class="topics" id="topics"></div>
-    </section>
+    </details>
   </div>
   <footer>volvo-mqtt <span id="version"></span> · <span id="host"></span> · <span id="platform"></span></footer>
 </div>
 <div class="toast" id="toast"></div>
 
-<script src="https://maps.googleapis.com/maps/api/js?key={{google_maps_api_key}}" async defer></script>
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const $ = (id) => document.getElementById(id);
 const CSRF = document.querySelector('meta[name="csrf-token"]').content;
@@ -346,6 +345,12 @@ function dur(sec) {
   if (h) return `${h}h ${m}m`;
   if (m) return `${m}m ${String(s).padStart(2, "0")}s`;
   return `${s}s`;
+}
+function distanceValues(value, unit) {
+  if (value === null || value === undefined || value === "" || !Number.isFinite(+value)) return null;
+  const source = +value;
+  const unitIsMiles = ["mi", "mile", "miles"].includes(String(unit || "km").trim().toLowerCase());
+  return unitIsMiles ? { miles: source, km: source / 0.621371 } : { miles: source * 0.621371, km: source };
 }
 const pretty = (k) => k.replace(/([A-Z])/g, " $1").replace(/^./, c => c.toUpperCase());
 function toast(msg) { const t = $("toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("show"), 3200); }
@@ -396,8 +401,8 @@ function render() {
     const tgt = v.target_battery_level;
     $("target-mark").hidden = !(tgt > 0 && tgt <= 100);
     if (tgt) { $("target-mark").style.left = `calc(${tgt}% - 1px)`; $("target-mark").title = `Charge target ${tgt}%`; }
-    $("range").innerHTML = v.electric_range !== undefined && v.electric_range !== null
-      ? `${fmtNum(v.electric_range)}<small>${v.range_unit || "km"} range</small>` : "";
+    const range = distanceValues(v.electric_range, v.range_unit);
+    $("range").innerHTML = range ? `${fmtNum(range.miles, 1)} mi<small> (${fmtNum(range.km, 1)} km range)</small>` : "";
     const st = v.charging_status, conn = v.charger_connection;
     let chip = "", text = "Unplugged";
     if (st === "CHARGING") { chip = "charging"; text = "Charging"; }
@@ -431,23 +436,36 @@ function render() {
     $("fuel-bar").firstElementChild.style.width = pct + "%";
     $("fuel-time").textContent = `${Math.round(pct)}% of ${tank} l · ` + $("fuel-time").textContent;
   }
-  $("odo").firstChild.nodeValue = fmtNum(v.odometer);
-  $("odo-unit").textContent = v.odometer_unit || "";
+  const odometer = distanceValues(v.odometer, v.odometer_unit);
+  $("odo").firstChild.nodeValue = odometer ? fmtNum(odometer.miles, 1) : "-";
+  $("odo-unit").textContent = odometer ? `mi (${fmtNum(odometer.km, 1)} km)` : "";
   $("odo-time").textContent = v.odometer_timestamp ? `Reported ${ago(v.odometer_timestamp)}` : "";
 
   // location
-  if (v.latitude !== undefined && v.latitude !== null && window.google) {
-    const ll = { lat: +v.latitude, lng: +v.longitude };
-    if (!map) {
-      map = new google.maps.Map($("map"), { zoom: 15, center: ll, mapTypeControl: false });
-      const accentColor = getComputedStyle(document.documentElement).getPropertyValue("--accent").trim();
-      marker = new google.maps.marker.AdvancedMarkerElement({ position: ll, map: map, title: "Vehicle location", content: (() => { const div = document.createElement("div"); div.style.width = "16px"; div.style.height = "16px"; div.style.borderRadius = "50%"; div.style.backgroundColor = accentColor; div.style.border = `2px solid ${accentColor}`; div.style.opacity = "0.35"; return div; })() });
-    } else { marker.position = ll; }
+  if (v.latitude !== undefined && v.latitude !== null && v.longitude !== undefined && v.longitude !== null) {
+    const lat = +v.latitude, lon = +v.longitude;
+    const ll = [lat, lon];
     $("coords").textContent = `${(+v.latitude).toFixed(5)}, ${(+v.longitude).toFixed(5)}`;
     $("heading").textContent = v.heading !== undefined && v.heading !== null ? `Heading ${fmtNum(v.heading)}°` : "";
     $("loc-time").textContent = v.location_timestamp ? ago(v.location_timestamp) : "";
     $("maps-link").hidden = false;
-    $("maps-link").href = `https://www.google.com/maps?q=${v.latitude},${v.longitude}`;
+    $("maps-link").href = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=15/${lat}/${lon}`;
+    try {
+      if (!window.L) throw new Error("Map library unavailable");
+      if (!map) {
+        map = L.map("map").setView(ll, 15);
+        L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          maxZoom: 19,
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+        const accentColor = getComputedStyle(document.documentElement).getPropertyValue("--accent").trim();
+        marker = L.circleMarker(ll, { radius: 8, color: accentColor, fillColor: accentColor, fillOpacity: 0.35, weight: 2 }).addTo(map);
+      } else {
+        marker.setLatLng(ll);
+      }
+    } catch (e) {
+      $("map").textContent = "Map unavailable. Use the OpenStreetMap link to view this location.";
+    }
   } else if (!S.config.enable_location) {
     $("coords").textContent = "Location polling disabled (ENABLE_LOCATION=false)";
   }
@@ -514,6 +532,10 @@ function render() {
   $("host").textContent = S.container.hostname;
   $("platform").textContent = `Python ${S.container.python}`;
 }
+
+$("location-card").addEventListener("toggle", () => {
+  if (map && $("location-card").open) setTimeout(() => map.invalidateSize(), 100);
+});
 
 async function loadLogs() {
   if (logsPaused) return;
