@@ -101,8 +101,9 @@ CSP = ("default-src 'self'; "
     "script-src 'self' 'nonce-{nonce}' https://cdn.jsdelivr.net; "
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; "
        "font-src https://fonts.gstatic.com; "
-    "img-src 'self' data: https://tile.openstreetmap.org; "
-    "connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'")
+    "img-src 'self' data: blob: https://tiles.openfreemap.org; "
+    "worker-src blob:; "
+    "connect-src 'self' https://tiles.openfreemap.org; frame-ancestors 'none'; base-uri 'none'; form-action 'self'")
 
 
 def make_handler(bridge: "Bridge"):
