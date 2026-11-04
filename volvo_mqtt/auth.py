@@ -81,6 +81,11 @@ class TokenManager:
     def has_tokens(self) -> bool:
         return bool(self.access_token or self.refresh_token)
 
+    @property
+    def connected(self) -> bool:
+        """Tokens exist and are usable: not (expired and the last refresh failed)."""
+        return self.has_tokens and not (self.last_error and self.seconds_left() <= 0)
+
     def _save(self) -> None:
         f = self.cfg.tokens_file
         tmp = f.with_suffix(".tmp")
@@ -113,6 +118,7 @@ class TokenManager:
             self.expires_at = time.time() + expires_in
             if "scope" in payload:
                 self.granted_scope = payload["scope"]
+            self.last_error = None
             log.info("Token stored: expires in %.0f min", expires_in / 60)
             self._save()
 
@@ -131,7 +137,8 @@ class TokenManager:
                 timeout=20,
             )
             if resp.status_code != 200:
-                raise AuthError(f"Token refresh failed: HTTP {resp.status_code} {resp.text[:300]}")
+                self.last_error = f"Token refresh failed: HTTP {resp.status_code} {resp.text[:300]}"
+                raise AuthError(self.last_error)
             self.store(resp.json())
             log.info("Access token refreshed, valid for %.0f min", self.seconds_left() / 60)
 

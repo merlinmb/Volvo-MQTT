@@ -81,7 +81,7 @@ def build_status(bridge: "Bridge") -> dict:
             "per_minute": bridge.cfg.requests_per_minute,
         },
         "volvo": {
-            "connected": t.has_tokens,
+            "connected": t.connected,
             "oauth_configured": bool(bridge.cfg.client_id and bridge.cfg.client_secret),
             "redirect_uri": bridge.cfg.redirect_uri,
             "scope": t.granted_scope,
