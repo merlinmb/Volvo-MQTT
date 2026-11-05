@@ -140,6 +140,8 @@ def load_config() -> Config:
         log.warning("Unknown POWERTRAIN=%r (use bev, phev or ice); assuming bev", powertrain)
         powertrain = "bev"
 
+    scopes = _get("VOLVO_SCOPES", f"{_BASE_SCOPES} {POWERTRAIN_SCOPES[powertrain]}")
+
     api_key = _get("VCC_API_KEY")
     if not api_key:
         raise SystemExit(f"VCC_API_KEY is not set (expected in {env_file})")
@@ -152,12 +154,12 @@ def load_config() -> Config:
         client_id=_get("VOLVO_CLIENT_ID"),
         client_secret=_get("VOLVO_CLIENT_SECRET"),
         redirect_uri=_get("VOLVO_REDIRECT_URI", "http://volvo.mgbeets.com/callback"),
-        scopes=_get("VOLVO_SCOPES", f"{_BASE_SCOPES} {POWERTRAIN_SCOPES[powertrain]}"),
+        scopes=scopes,
         access_token=_get("VOLVO_ACCESS_TOKEN"),
         refresh_token=_get("VOLVO_REFRESH_TOKEN"),
-        token_url=_get("VOLVO_TOKEN_URL", "https://volvoid.eu.volvocars.com/as/token.oauth2"),
+        token_url=_get("VOLVO_TOKEN_URL", "https://auth.volvocars.com/realms/volvocars/protocol/openid-connect/token"),
         authorize_url=_get(
-            "VOLVO_AUTHORIZE_URL", "https://volvoid.eu.volvocars.com/as/authorization.oauth2"
+            "VOLVO_AUTHORIZE_URL", "https://auth.volvocars.com/realms/volvocars/protocol/openid-connect/auth"
         ),
         api_base=_get("VOLVO_API_BASE", "https://api.volvocars.com/connected-vehicle/v2"),
         location_base=_get("VOLVO_LOCATION_BASE", "https://api.volvocars.com/location/v1"),

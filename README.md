@@ -30,7 +30,8 @@ limiting and a built-in web dashboard.
 
 1. Sign in at developer.volvocars.com and create an API application.
 2. Copy the **VCC API key**.
-3. Publish the application to get a **client ID / client secret**, request the
+3. Publish the application to get a **client ID / client secret** (the client ID
+   starts with `vid-dc-`; old `dc-` clients stop working after 31 January 2027), request the
    scopes below, register the redirect URI `http://volvo.your_url.com/callback`,
    and use `/terms` and `/privacy` on the same host as the Terms and Privacy URLs.
 
